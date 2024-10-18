@@ -4,11 +4,312 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Webcam</title>
-</head>
+
+  <head>
+    <link rel="icon" type="image/svg+xml"
+      href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='%23ffffff' viewBox='0 0 256 256'><path d='M128,32a72,72,0,1,0,72,72A72,72,0,0,0,128,32Zm0,104a32,32,0,1,1,32-32A32,32,0,0,1,128,136Z' opacity='0.2'></path><path d='M168,104a40,40,0,1,0-40,40A40,40,0,0,0,168,104Zm-64,0a24,24,0,1,1,24,24A24,24,0,0,1,104,104Zm120,96H136V183.6a80,80,0,1,0-16,0V200H32a8,8,0,0,0,0,16H224a8,8,0,0,0,0-16ZM64,104a64,64,0,1,1,64,64A64.07,64.07,0,0,1,64,104Z'></path></svg>" />
+    <title>Webcam</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      #instructions {
+        position: absolute;
+        z-index: 5;
+        font-size: 20px;
+        opacity: 1;
+        line-height: 1.5em;
+        margin: 0 20px;
+        transition: opacity 0.5s ease-in-out;
+      }
+
+      video {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+        transform: translate(-50%, -50%);
+        transition: object-fit 0.3s ease-in-out;
+      }
+
+      .control-button {
+        position: absolute;
+        padding: 10px;
+        background-color: rgba(0, 0, 0, 0.5);
+        border: none;
+        cursor: pointer;
+        z-index: 10;
+        border-radius: 5px;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #fullscreen-toggle {
+        right: 20px;
+        bottom: 20px;
+      }
+
+      #camera-toggle {
+        left: 20px;
+        bottom: 20px;
+      }
+
+      #torch-toggle {
+        right: 20px;
+        top: 20px;
+      }
+
+      #crop-toggle {
+        left: 20px;
+        top: 20px;
+      }
+
+      button:hover {
+        background-color: rgba(0, 0, 0, 0.8);
+      }
+
+      .icon {
+        width: 32px;
+        height: 32px;
+      }
+    </style>
+  </head>
 
 <body>
+  <!-- Instructions text -->
+  <div id="instructions">This site allows you to access your device's webcam and
+    display the video feed. It provides controls for functionality such as camera switching, fullscreen mode, torch
+    and cropping. It is particularly designed for use on mobile devices.</div>
 
+  <!-- Video element -->
+  <video id="webcam" autoplay playsinline></video>
+
+  <!-- Crop toggle button -->
+  <button id="crop-toggle" class="control-button" aria-label="Toggle Crop">
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#ffffff" viewBox="0 0 256 256">
+      <path
+        d="M200,80v32a8,8,0,0,1-16,0V88H160a8,8,0,0,1,0-16h32A8,8,0,0,1,200,80ZM96,168H72V144a8,8,0,0,0-16,0v32a8,8,0,0,0,8,8H96a8,8,0,0,0,0-16ZM232,56V200a16,16,0,0,1-16,16H40a16,16,0,0,1-16-16V56A16,16,0,0,1,40,40H216A16,16,0,0,1,232,56ZM216,200V56H40V200H216Z">
+      </path>
+    </svg>
+  </button>
+
+  <!-- Torch toggle button -->
+  <button id="torch-toggle" class="control-button" aria-label="Toggle Torch">
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#ffffff" viewBox="0 0 256 256">
+      <path
+        d="M184,16H72A16,16,0,0,0,56,32V77.33a16.12,16.12,0,0,0,3.2,9.6L80,114.67V224a16,16,0,0,0,16,16h64a16,16,0,0,0,16-16V114.67l20.8-27.74a16.12,16.12,0,0,0,3.2-9.6V32A16,16,0,0,0,184,16ZM72,32H184V56H72V32Zm91.2,73.07a16.12,16.12,0,0,0-3.2,9.6V224H96V114.67a16.12,16.12,0,0,0-3.2-9.6L72,77.33V72H184v5.33ZM136,120v32a8,8,0,0,1-16,0V120a8,8,0,0,1,16,0Z">
+      </path>
+    </svg>
+  </button>
+
+  <!-- Camera switch toggle button -->
+  <button id="camera-toggle" class="control-button" aria-label="Switch Camera">
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#ffffff" viewBox="0 0 256 256">
+      <path
+        d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM176,96v24a8,8,0,0,1-8,8H144a8,8,0,0,1,0-16h5.15a32.12,32.12,0,0,0-40.34-1.61A8,8,0,0,1,99.19,97.6,48.21,48.21,0,0,1,160,100.23V96a8,8,0,0,1,16,0Zm-17.61,59.2a8,8,0,0,1-1.58,11.2A48.21,48.21,0,0,1,96,163.77V168a8,8,0,0,1-16,0V144a8,8,0,0,1,8-8h24a8,8,0,0,1,0,16h-5.15a32.12,32.12,0,0,0,40.34,1.61A8,8,0,0,1,158.39,155.2Z">
+      </path>
+    </svg>
+  </button>
+
+  <!-- Fullscreen toggle button -->
+  <button id="fullscreen-toggle" class="control-button" aria-label="Toggle Fullscreen">
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#ffffff" viewBox="0 0 256 256">
+      <path
+        d="M216,48V88a8,8,0,0,1-16,0V56H168a8,8,0,0,1,0-16h40A8,8,0,0,1,216,48ZM88,200H56V168a8,8,0,0,0-16,0v40a8,8,0,0,0,8,8H88a8,8,0,0,0,0-16Zm120-40a8,8,0,0,0-8,8v32H168a8,8,0,0,0,0,16h40a8,8,0,0,0,8-8V168A8,8,0,0,0,208,160ZM88,40H48a8,8,0,0,0-8,8V88a8,8,0,0,0,16,0V56H88a8,8,0,0,0,0-16Z">
+      </path>
+    </svg>
+  </button>
+
+  <script>
+    let isUsingFrontCamera = true; // Variable to track the current camera
+    let buttonsVisible = true; // Track the visibility of the buttons
+    let hideTimeout; // Variable to manage the hide timer
+    let isCropped = false; // Track whether the video is cropped
+    let videoTrack; // To store the video track for toggling torch
+    let torchSupported = false; // Flag to check torch support
+
+    let videoElement = document.getElementById('webcam');
+    const instructions = document.getElementById('instructions');
+    const fullscreenToggleButton = document.getElementById('fullscreen-toggle');
+    const cropToggleButton = document.getElementById('crop-toggle')
+    const cameraToggleButton = document.getElementById('camera-toggle');
+    const torchToggleButton = document.getElementById('torch-toggle');
+
+    async function checkCamerasAvailability() {
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        let hasUserFacingCamera = false;
+        let hasEnvironmentCamera = false;
+
+        devices.forEach(device => {
+          if (device.kind === 'videoinput') {
+            if (device.label.toLowerCase().includes('front') || device.label.toLowerCase().includes('user')) {
+              hasUserFacingCamera = true;
+            } else if (device.label.toLowerCase().includes('back') || device.label.toLowerCase().includes('environment')) {
+              hasEnvironmentCamera = true;
+            }
+          }
+        });
+
+        // Show or hide the camera switch button based on camera availability
+        if (hasUserFacingCamera && hasEnvironmentCamera) {
+          cameraToggleButton.style.visibility = 'visible'
+        } else {
+          cameraToggleButton.style.visibility = 'hidden'
+        }
+      } catch (error) {
+        console.error("Error accessing devices:", error);
+      }
+    }
+
+    // Function to start the webcam, with the ability to switch cameras
+    async function startWebcam(facingMode = 'user') {
+      // Stop the existing video stream, if any, when switching cameras
+      if (videoElement.srcObject) {
+        const stream = videoElement.srcObject;
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            width: { ideal: 4096 },
+            height: { ideal: 2160 },
+            facingMode
+          }
+        });
+        videoElement.srcObject = stream;
+        videoTrack = stream.getVideoTracks()[0]; // Get the video track
+
+        // Check camera availability after starting the webcam
+        checkCamerasAvailability();
+
+        // Check for torch support
+        const capabilities = videoTrack.getCapabilities?.();
+        torchSupported = capabilities?.torch && facingMode !== "user"
+        if (torchSupported) {
+          torchToggleButton.style.visibility = 'visible'
+        } else {
+          torchToggleButton.style.visibility = 'hidden'
+        }
+
+        if (facingMode === 'user') {
+          videoElement.style.transform = 'translate(-50%, -50%) scaleX(-1)'; // Flip horizontally
+        } else {
+          videoElement.style.transform = 'translate(-50%, -50%) scaleX(1)'; // Normal for back camera
+        }
+
+        // Fade in available buttons after camera started
+        toggleButtonVisibility(true);
+
+        // Hide instructions when the camera feed starts
+        instructions.style.opacity = '0'; // Fade out instructions
+        setTimeout(() => {
+          instructions.style.display = 'none'; // Hide instructions after fade out
+        }, 500);
+      } catch (error) {
+        console.error("Error accessing webcam:", error);
+      }
+    }
+
+    // Function to toggle fullscreen mode
+    function toggleFullscreen(e) {
+      e.stopPropagation();
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Function to toggle between front and back camera
+    function toggleCamera(e) {
+      e.stopPropagation();
+      isUsingFrontCamera = !isUsingFrontCamera; // Toggle the camera state
+      const facingMode = isUsingFrontCamera ? 'user' : { exact: 'environment' };
+      startWebcam(facingMode);
+    }
+
+    // Function to toggle cropping
+    function toggleCrop(e) {
+      e.stopPropagation();
+      isCropped = !isCropped;
+      adjustVideoSize(); // Adjust video size based on cropping state
+    }
+
+    // Function to adjust the video size based on cropping state and rotation
+    function adjustVideoSize() {
+      if (isCropped) {
+        videoElement.style.width = '100vw'; // Fill screen if cropped
+        videoElement.style.height = '100vh'; // Fill screen if cropped
+      } else {
+        videoElement.style.width = 'auto'; // 100% width if uncropped
+        videoElement.style.height = 'auto'; // 100% height if uncropped
+      }
+    }
+
+    // Function to toggle the torch
+    function toggleTorch(e) {
+      e.stopPropagation();
+      if (torchSupported) {
+        const enabled = videoTrack.getSettings().torch ? false : true; // Toggle state
+        videoTrack.applyConstraints({
+          advanced: [{ torch: enabled }]
+        }).then(() => {
+          console.log(`Torch is now ${enabled ? 'on' : 'off'}`);
+        }).catch(error => {
+          console.error("Error toggling torch:", error);
+        });
+      }
+    }
+
+    // Function to toggle button visibility
+    function toggleButtonVisibility(visibility) {
+      buttonsVisible = visibility ?? !buttonsVisible; // Toggle visibility state
+      const buttons = document.querySelectorAll('.control-button');
+      buttons.forEach(button => {
+        button.style.opacity = buttonsVisible ? '1' : '0'; // Fade in/out buttons
+        button.style.pointerEvents = buttonsVisible ? 'auto' : 'none'
+      });
+    }
+
+    // Add event listener for taps (clicks) on the document in fullscreen
+    document.addEventListener('click', (event) => {
+      toggleButtonVisibility(); // Call the function on tap
+    });
+
+    // Add event listeners to the buttons
+    fullscreenToggleButton.addEventListener('click', toggleFullscreen);
+    cameraToggleButton.addEventListener('click', toggleCamera);
+    cropToggleButton.addEventListener('click', toggleCrop);
+    torchToggleButton.addEventListener('click', toggleTorch);
+
+    // Start with the front camera by default
+    startWebcam();
+  </script>
 </body>
 
 </html>
